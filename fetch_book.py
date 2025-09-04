@@ -7,7 +7,7 @@ import time
 
 
 
-def main(next_url,nb_chapters,file_name,writeFile=True,logger=print):
+def main(next_url, nb_chapters, file_name, start_chapter=1, writeFile=True, logger=print):
 
     CSS='''<style>
     .chapter-content table {
@@ -25,57 +25,54 @@ def main(next_url,nb_chapters,file_name,writeFile=True,logger=print):
     </style>
     '''
 
-    logger("URL : ",next_url)
-    logger("Number of chapters : ",nb_chapters)
-    logger("File name : ",file_name,"\n")
+    logger("URL : ", next_url)
+    logger("Number of chapters : ", nb_chapters)
+    logger("Start from chapter : ", start_chapter)
+    logger("File name : ", file_name, "\n")
 
     session = HTMLSession()
     if writeFile:
-        f = open(file_name,"w+",encoding="utf-8")
+        f = open(file_name, "w+", encoding="utf-8")
         f.write(CSS)
 
     book = CSS
-    for i in range(1,nb_chapters+1):
+    chapter_count = 1
+    while chapter_count <= nb_chapters:
         try:
-            
             s = session.get(next_url)
-            S=""
-            
+            S = ""
+
             # Website implemented protection against scraping
             # "Slow down!"
             while(s.status_code == 429):
                 time.sleep(0.2)
                 s = session.get(next_url)
 
-            #Fetch title
-            chapter_title = (s.html.find('h1.font-white')[0]).text
-            S+='<h1 class=\"chapter\">' + chapter_title + '</h1>\n'
+            if chapter_count >= start_chapter:
+                #Fetch title
+                chapter_title = (s.html.find('h1.font-white')[0]).text
+                S += '<h1 class=\"chapter\">' + chapter_title + '</h1>\n'
+                logger(chapter_count, " ", chapter_title)
+                #Fetch the chapter content
+                chapter_content = s.html.find('.chapter-inner', first=True).html
+                S += chapter_content
+                #Fetch the author note (if there is one)
+                author_note = s.html.find('.portlet-body.author-note')
+                if(len(author_note) == 1):
+                    note_content = author_note[0].html
+                    S += '<h3 class=\"author_note\"> Author note </h3>\n'
+                    S += note_content
+                elif(len(author_note) == 2):
+                    note_content = author_note[0].html
+                    S += '<h3 class=\"author_note\"> Author note top page </h3>\n'
+                    S += note_content
+                    note_content = author_note[1].html
+                    S += '<h3 class=\"author_note\"> Author note bottom page </h3>\n'
+                    S += note_content
 
-            logger(i," ",chapter_title)
-            
-            #Fetch the chapter content
-            chapter_content = s.html.find('.chapter-inner',first=True).html
-            S+=chapter_content
-            
-            #Fetch the author note (if there is one)
-            author_note = s.html.find('.portlet-body.author-note')
-            if(len(author_note)==1): 
-                note_content = author_note[0].html
-                S+='<h3 class=\"author_note\"> Author note </h3>\n'
-                S+=note_content
-            elif(len(author_note)==2):
-                note_content = author_note[0].html
-                S+='<h3 class=\"author_note\"> Author note top page </h3>\n'
-                S+=note_content
-                note_content = author_note[1].html
-                S+='<h3 class=\"author_note\"> Author note bottom page </h3>\n'
-                S+=note_content
-            
-            book += S
-
-            if writeFile:
-                #Write the whole content in the file
-                f.write(S)
+                book += S
+                if writeFile:
+                    f.write(S)
 
             try:
                 #Fetch the url of the next chapter
@@ -83,33 +80,34 @@ def main(next_url,nb_chapters,file_name,writeFile=True,logger=print):
             except:
                 logger("Last chapter ! Exiting...")
                 break
-            
-        except:
-            logger("Error on chapter",i,sys.exc_info()[0])
 
+            chapter_count += 1
+
+        except:
+            logger("Error on chapter", chapter_count, sys.exc_info()[0])
             if writeFile:
                 f.close()
-
             break
-    
-    f.close()    
-    return S
-        
-    
 
+    f.close()
+    return S
 
 def printUsage():
-    logger("Usage :\n   fetch_book.py url_of_chapter number_of_chapters name_of_ebook")
-
+    logger("Usage :\n   fetch_book.py url_of_chapter number_of_chapters [start_chapter] name_of_ebook")
 
 if __name__ == "__main__":
     args = sys.argv[1:]
-    if(len(args) != 3):
+    if len(args) not in (3, 4):
         printUsage()
         exit()
 
     next_url = args[0]
     nb_chapters = int(args[1])
-    file_name = args[2] +".html"
-    main(next_url,nb_chapters,file_name)
+    if len(args) == 4:
+        start_chapter = int(args[2])
+        file_name = args[3] + ".html"
+    else:
+        start_chapter = 1
+        file_name = args[2] + ".html"
+    main(next_url, nb_chapters, file_name, start_chapter)
     exit()

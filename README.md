@@ -51,12 +51,13 @@ It also uses [calibre](https://github.com/kovidgoyal/calibre) to convert and pus
 
 The following command pull the chapter
 
-	python fetch_book.py url_of_chapter number_of_chapters name_of_ebook
+	python fetch_book.py url_of_chapter number_of_chapters number_chapter_start_downloading name_of_ebook
 
 Parameters :
 
 * url_of_chapter : The URL of the chapter (not of the story homepage!)
 * number_of_chapters : You guessed. If you want the whole book, just enter something like 99999
+* number_chapter_start_downloading : From which chapter will it start downloading?, for download all juste enter 1
 * name_of_ebook : The name of the ebook, .html extension will be added when the file is written on the filesystem.
 
 It reads the chapter content of the URL given ( url_of_chapter ) and goes to the next chapter, and it loops number_of_chapters times.
@@ -66,7 +67,7 @@ This command will give you a file ```name_of_ebook.html``` on your filesystem, t
 
 ## Fetch, convert, and push to your device :
 
-	fetchAndCopy.py url_of_chapter number_of_chapters name_of_ebook
+	fetchAndCopy.py url_of_chapter number_of_chapters number_chapter_start_downloading name_of_ebook
 
 This script will download the chapter and push it to the first kindle detected. ```name_of_ebook``` is the name of the ebook which will be visible.
 
@@ -75,6 +76,6 @@ This script will download the chapter and push it to the first kindle detected. 
 
 If you want to fetch the best rated story Mother of Learning from the first chapter, execute the following command :
 
-    python fetch_book.py https://www.royalroad.com/fiction/21220/mother-of-learning/chapter/301778/1-good-morning-brother 102 Mother_Of_Learning
+    python fetch_book.py https://www.royalroad.com/fiction/21220/mother-of-learning/chapter/301778/1-good-morning-brother 0 102 Mother_Of_Learning
 
 In the example above, MOL.html is written a the working directory.
