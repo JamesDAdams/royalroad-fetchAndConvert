@@ -57,7 +57,7 @@ Parameters :
 
 * url_of_chapter : The URL of the chapter (not of the story homepage!)
 * number_of_chapters : You guessed. If you want the whole book, just enter something like 99999
-* number_chapter_start_downloading : From which chapter will it start downloading?, for download all juste enter 1
+* number_chapter_start_downloading : From which chapter will it start downloading, for download all juste enter 1
 * name_of_ebook : The name of the ebook, .html extension will be added when the file is written on the filesystem.
 
 It reads the chapter content of the URL given ( url_of_chapter ) and goes to the next chapter, and it loops number_of_chapters times.
